@@ -186,3 +186,29 @@ h1 {
   border-radius: 6px;
   font-family: 'Courier New', monospace;
 }
+
+/* Number copy = Yellow */
+
+.numbox.yellow {
+  background: #4a4200 !important;
+  border-color: #ffd600 !important;
+  box-shadow: 0 0 18px #ffd600aa !important;
+}
+
+
+/* OTP success = Green */
+
+.numbox.green {
+  background: #003d1f !important;
+  border-color: #00e676 !important;
+  box-shadow: 0 0 20px #00e676aa !important;
+}
+
+
+/* Timer finished = Red */
+
+.numbox.red {
+  background: #4a1a1a !important;
+  border-color: #ff5252 !important;
+  box-shadow: 0 0 20px #ff5252aa !important;
+}
