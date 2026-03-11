@@ -1,291 +1,273 @@
-// ------------------ Instance अलग करने के लिए नाम ------------------
-let INSTANCE_NAME = localStorage.getItem('hp_instance_name');
+const BASE_URL = "https://nitish.sawanpoint0000.workers.dev/";
 
-if (!INSTANCE_NAME) {
-  let nameInput = prompt(
-    "इस टैब/इंस्टेंस का नाम डालो (उदाहरण: tab1, phoneA, mypanel2, insta1 आदि)\n" +
-    "अलग-अलग टैब में अलग नाम डालना जरूरी है वरना conflict होगा!\n" +
-    "(खाली छोड़ने पर रैंडम नाम बन जाएगा)",
-    ""
-  );
+const SERVICE = "swr";
+const COUNTRY = "22";
+const MAX_PRICE = "80";
 
-  if (!nameInput || nameInput.trim() === "") {
-    nameInput = "default_" + Math.random().toString(36).substring(2, 9);
-  } else {
-    nameInput = nameInput.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
-  }
+let isOn = false;
 
-  INSTANCE_NAME = nameInput;
-  localStorage.setItem('hp_instance_name', INSTANCE_NAME);
-  alert("इस इंस्टेंस का नाम सेट हो गया: " + INSTANCE_NAME + "\nअब अलग टैब में दूसरा नाम डालकर चलाओ");
-}
-
-const getKey = (base) => `hp_${base}_${INSTANCE_NAME}`;
-
-const STATE_KEY   = getKey('isOn');
-const USED_KEY    = getKey('used_numbers');
-const ACTIVE_KEY  = getKey('active_numbers');
-
-// ----------------------------------------------------
-
-const API_KEY    = "1a781664f51ec5c8c82722d31d3c91e4";
-const BASE_URL   = "https://api.grizzlysms.com/stubs/handler_api.php";
-const SERVICE    = "swr";
-const COUNTRY    = "22";
-const MAX_PRICE  = "80";
-
-let isOn = localStorage.getItem(STATE_KEY) === 'true';
-let usedNumbers = JSON.parse(localStorage.getItem(USED_KEY) || '[]');
-let activeNumbers = JSON.parse(localStorage.getItem(ACTIVE_KEY) || '[]');
-
-const toggleBtn   = document.getElementById('toggleBtn');
-const statusDiv   = document.getElementById('status');
-const numbersDiv  = document.getElementById('numbers');
+const toggleBtn = document.getElementById('toggleBtn');
+const statusDiv = document.getElementById('status');
+const numbersDiv = document.getElementById('numbers');
 
 let interval = null;
 
-function updateUI() {
-  toggleBtn.textContent = isOn ? 'OFF Karo' : 'ON Karo';
-  toggleBtn.classList.toggle('off', !isOn);
-  statusDiv.textContent = isOn ? 'Auto buy fast mode...' : 'Off hai → ON dabao';
+function updateUI(){
+
+toggleBtn.textContent = isOn ? "OFF Karo" : "ON Karo";
+
+statusDiv.textContent = isOn
+? "Auto buy fast mode..."
+: "Off hai → ON dabao";
+
 }
 
-toggleBtn.onclick = () => {
-  isOn = !isOn;
-  localStorage.setItem(STATE_KEY, isOn ? 'true' : 'false');
-  updateUI();
-  if (isOn) startFetching();
-  else stopFetching();
+toggleBtn.onclick = ()=>{
+
+isOn = !isOn;
+
+updateUI();
+
+if(isOn){
+startFetching();
+}else{
+stopFetching();
+}
+
 };
 
-function saveActive() {
-  localStorage.setItem(ACTIVE_KEY, JSON.stringify(activeNumbers));
+
+function createNumberBox(num,id,startTime){
+
+const box = document.createElement("div");
+
+box.className="numbox";
+
+box.dataset.id=id;
+
+box.innerHTML=`
+
+<div class="top-row">
+
+<div class="phone10">${num}</div>
+
+<button class="copy-number-btn">Copy No.</button>
+
+</div>
+
+<div class="otp-area rotating">
+
+<div class="otp waiting">
+
+Waiting for OTP...
+
+</div>
+
+<button class="copy-otp-btn">Copy OTP</button>
+
+</div>
+
+<div class="timer">05:00</div>
+
+`;
+
+const phoneEl = box.querySelector(".phone10");
+
+const copyBtn = box.querySelector(".copy-number-btn");
+
+const otpBtn = box.querySelector(".copy-otp-btn");
+
+const otpEl = box.querySelector(".otp");
+
+const otpArea = box.querySelector(".otp-area");
+
+
+function copyNumber(){
+
+navigator.clipboard.writeText(num);
+
+box.classList.remove("green","red");
+
+box.classList.add("yellow");
+
 }
 
-function isValid(phone) {
-  if (!phone || phone.length !== 12) return false;
-  if (!phone.startsWith("91")) return false;
-  if (!/^\d{12}$/.test(phone)) return false;
-  if (usedNumbers.includes(phone)) return false;
+phoneEl.onclick = copyNumber;
 
-  usedNumbers.push(phone);
-  localStorage.setItem(USED_KEY, JSON.stringify(usedNumbers));
-  return true;
+copyBtn.onclick = copyNumber;
+
+
+otpBtn.onclick = ()=>{
+
+const otp = otpEl.textContent.trim();
+
+if(!otp.includes("Waiting")){
+
+navigator.clipboard.writeText(otp);
+
 }
 
-function cleanStorage() {
-  const now = Date.now();
-  activeNumbers = activeNumbers.filter(item =>
-    item.phone && item.phone.length === 12 &&
-    item.phone.startsWith("91") &&
-    (now - item.startTime) < 300000
-  );
-  saveActive();
+};
+
+
+startTimer(box,startTime);
+
+startPolling(box,id);
+
+return box;
+
 }
 
-function renderSaved() {
-  cleanStorage();
-  numbersDiv.innerHTML = '';
 
-  activeNumbers
-    .sort((a, b) => b.startTime - a.startTime)
-    .forEach(item => {
-      const box = createNumberBox(item.phone.slice(2), item.id, item.startTime, item.otp);
-      numbersDiv.appendChild(box);
 
-      // Timer और Polling दोनों refresh के बाद भी सही से चालू रहें
-      startTimer(box, item.startTime);
-      if (!item.otp) {
-        startPolling(box, item.id);
-      }
-    });
+function startTimer(box,startTime){
+
+const timer = box.querySelector(".timer");
+
+const timerLoop = setInterval(()=>{
+
+const elapsed = Math.floor((Date.now()-startTime)/1000);
+
+const remain = 300-elapsed;
+
+if(remain<=0){
+
+box.classList.remove("yellow","green");
+
+box.classList.add("red");
+
+clearInterval(timerLoop);
+
+setTimeout(()=>{
+
+box.remove();
+
+},2000);
+
+return;
+
 }
 
-function flashBoxRed(box) {
-  box.classList.add('copied-flash');
-  setTimeout(() => box.classList.remove('copied-flash'), 1500);
+const m = String(Math.floor(remain/60)).padStart(2,"0");
+
+const s = String(remain%60).padStart(2,"0");
+
+timer.textContent=`${m}:${s}`;
+
+},1000);
+
 }
 
-function createNumberBox(num10, id, startTime, otp = null) {
-  const box = document.createElement('div');
-  box.className = 'numbox';
-  box.dataset.id = id;
 
-  const clickedKey = `copy_${id}_${INSTANCE_NAME}`;
-  const clickedClass = localStorage.getItem(clickedKey) === 'once' ? 'clicked-once' : '';
 
-  box.innerHTML = `
-    <div class="top-row">
-      <div class="phone10">${num10}</div>
-      <button class="copy-number-btn ${clickedClass}">Copy No.</button>
-    </div>
+function startPolling(box,id){
 
-    <div class="otp-area ${otp ? '' : 'rotating'}">
-      <div class="otp ${otp ? 'success' : 'waiting'}">
-        ${otp || 'Waiting for OTP...'}
-      </div>
-      <button class="copy-otp-btn">Copy OTP</button>
-    </div>
+const otpEl = box.querySelector(".otp");
 
-    <div class="timer">05:00</div>
-  `;
+const otpArea = box.querySelector(".otp-area");
 
-  const phoneEl = box.querySelector('.phone10');
-  const copyNumBtn = box.querySelector('.copy-number-btn');
+const poll = setInterval(async ()=>{
 
-  const copyNumberAction = () => {
-    navigator.clipboard.writeText(num10).catch(() => {});
-    flashBoxRed(box);
+try{
 
-    if (copyNumBtn.classList.contains('clicked-once')) {
-      copyNumBtn.classList.remove('clicked-once');
-      localStorage.removeItem(clickedKey);
-    } else {
-      copyNumBtn.classList.add('clicked-once');
-      localStorage.setItem(clickedKey, 'once');
-    }
-  };
+const params = new URLSearchParams({
 
-  phoneEl.onclick = copyNumberAction;
-  copyNumBtn.onclick = copyNumberAction;
+action:"getStatus",
 
-  const copyOtpBtn = box.querySelector('.copy-otp-btn');
-  copyOtpBtn.onclick = () => {
-    const otpText = box.querySelector('.otp').textContent.trim();
-    if (otpText && !otpText.includes('Waiting') && !otpText.includes('wait')) {
-      navigator.clipboard.writeText(otpText).catch(() => {});
-      copyOtpBtn.textContent = "Copied!";
-      setTimeout(() => copyOtpBtn.textContent = "Copy OTP", 1800);
-    }
-  };
+id
 
-  return box;
+});
+
+const res = await fetch(BASE_URL+"?"+params);
+
+const text = (await res.text()).trim();
+
+if(text.startsWith("STATUS_OK")){
+
+const code = text.split(":")[1];
+
+otpEl.textContent = code;
+
+otpEl.classList.remove("waiting");
+
+otpEl.classList.add("success");
+
+otpArea.classList.remove("rotating");
+
+box.classList.remove("yellow");
+
+box.classList.add("green");
+
+clearInterval(poll);
+
 }
 
-function startTimer(box, startTime) {
-  const timerEl = box.querySelector('.timer');
+}catch{}
 
-  function updateTimer() {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    let remaining = 300 - elapsed;
+},1800);
 
-    if (remaining <= 0) {
-      box.remove();
-      activeNumbers = activeNumbers.filter(i => i.id !== box.dataset.id);
-      saveActive();
-      return;
-    }
-
-    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
-    const s = String(remaining % 60).padStart(2, '0');
-    timerEl.textContent = `${m}:${s}`;
-  }
-
-  updateTimer(); // तुरंत अपडेट
-  const timerInterval = setInterval(updateTimer, 980);
-
-  // Cleanup (page छोड़ने पर)
-  const cleanup = () => clearInterval(timerInterval);
-  window.addEventListener('beforeunload', cleanup, { once: true });
-  // box हटने पर भी रोक दो
-  const observer = new MutationObserver(() => {
-    if (!document.body.contains(box)) {
-      clearInterval(timerInterval);
-      observer.disconnect();
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
 }
 
-function startPolling(box, id) {
-  const otpEl = box.querySelector('.otp');
-  const otpArea = box.querySelector('.otp-area');
 
-  const poll = setInterval(async () => {
-    const params = new URLSearchParams({ api_key: API_KEY, action: 'getStatus', id });
-    try {
-      const res = await fetch(BASE_URL + '?' + params);
-      const text = (await res.text()).trim();
 
-      if (text.startsWith('STATUS_OK')) {
-        const code = text.split(':')[1];
-        otpEl.textContent = code;
-        otpEl.classList.add('success');
-        otpArea.classList.remove('rotating');
-        clearInterval(poll);
+async function fetchNumber(){
 
-        const itemIndex = activeNumbers.findIndex(i => i.id === id);
-        if (itemIndex !== -1) {
-          activeNumbers[itemIndex].otp = code;
-          saveActive();
-        }
-      }
-    } catch {
-      // silent
-    }
-  }, 1800);
+if(!isOn) return;
 
-  // Cleanup
-  const cleanup = () => clearInterval(poll);
-  window.addEventListener('beforeunload', cleanup, { once: true });
+const params = new URLSearchParams({
 
-  const observer = new MutationObserver(() => {
-    if (!document.body.contains(box)) {
-      clearInterval(poll);
-      observer.disconnect();
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
+action:"getNumber",
+
+service:SERVICE,
+
+country:COUNTRY,
+
+maxPrice:MAX_PRICE
+
+});
+
+try{
+
+const res = await fetch(BASE_URL+"?"+params);
+
+const text = (await res.text()).trim();
+
+if(text.startsWith("ACCESS_NUMBER")){
+
+const [,id,full] = text.split(":");
+
+const num = full.slice(2);
+
+const startTime = Date.now();
+
+const box = createNumberBox(num,id,startTime);
+
+numbersDiv.prepend(box);
+
+window.scrollTo({top:0,behavior:"smooth"});
+
 }
 
-async function fetchNumber() {
-  if (!isOn) return;
+}catch{}
 
-  const params = new URLSearchParams({
-    api_key: API_KEY,
-    action: 'getNumber',
-    service: SERVICE,
-    country: COUNTRY,
-    maxPrice: MAX_PRICE
-  });
-
-  try {
-    const res = await fetch(BASE_URL + '?' + params);
-    const text = (await res.text()).trim();
-
-    if (text.startsWith('ACCESS_NUMBER')) {
-      const [, id, full] = text.split(':');
-      if (!isValid(full)) return;
-
-      const startTime = Date.now();
-      const item = { id, phone: full, startTime, otp: null };
-      activeNumbers.unshift(item);
-      saveActive();
-
-      const box = createNumberBox(full.slice(2), id, startTime);
-      numbersDiv.prepend(box);
-
-      startTimer(box, startTime);
-      startPolling(box, id);
-    }
-  } catch {
-    // silent
-  }
 }
 
-function startFetching() {
-  fetchNumber();
-  interval = setInterval(fetchNumber, 1200);
+
+
+function startFetching(){
+
+fetchNumber();
+
+interval=setInterval(fetchNumber,1200);
+
 }
 
-function stopFetching() {
-  if (interval) {
-    clearInterval(interval);
-    interval = null;
-  }
+function stopFetching(){
+
+clearInterval(interval);
+
+interval=null;
+
 }
 
-// Initialize
 updateUI();
-renderSaved();
-if (isOn) startFetching();
