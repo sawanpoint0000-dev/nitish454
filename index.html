@@ -3,255 +3,410 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HACKER PANEL 2.0</title>
+<title>HACKER PANEL 1.0</title>
 <style>
-body{font-family:Segoe UI,Arial;background:#0f0f17;color:#e0e0ff;padding:16px;max-width:620px;margin:auto;}
-h1{text-align:center;color:#00d4ff;}
-#toggleBtn{width:100%;padding:16px;font-size:19px;font-weight:bold;color:white;border:none;border-radius:12px;cursor:pointer;margin-bottom:16px;background:#00c853;}
-#toggleBtn.off{background:#ff5252;}
-#status{padding:14px;margin-bottom:16px;border-radius:10px;text-align:center;background:#1a1a2e;}
-#numbers{display:flex;flex-direction:column;gap:14px;}
-.numbox{background:#171725;padding:14px;border-radius:12px;border:1px solid #2a2a4a;position:relative;}
-.numbox.yellow{background:#4a4200;border-color:#ffd600;}
-.top-row{display:flex;gap:12px;font-size:19px;font-weight:bold;align-items:center;}
-.phone10{flex:1;cursor:pointer;color:#a5d8ff;}
-.copy-number-btn,.copy-otp-btn{padding:8px 14px;border:none;border-radius:8px;cursor:pointer;color:white;}
-.copy-number-btn{background:#2962ff;}
-.copy-otp-btn{background:#8e24aa;}
-.otp-area{display:flex;gap:12px;background:#0d0d1f;padding:10px;border-radius:8px;margin-top:8px;}
-.otp{flex:1;text-align:center;font-size:18px;letter-spacing:2px;color:#ffeb3b;}
-.otp.success{color:#00e676;}
-.timer{position:absolute;top:8px;right:12px;font-size:13px;color:#ff6d00;font-weight:bold;}
-.api-tag{position:absolute;top:8px;left:12px;font-size:11px;padding:2px 6px;border-radius:4px;color:white;}
-.api1{background:#00695c;}
-.api2{background:#d81b60;}
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f0f17;
+    color: #e0e0ff;
+    padding: 16px;
+    max-width: 620px;
+    margin: auto;
+  }
+  h1 {
+    text-align: center;
+    color: #00d4ff;
+    font-size: 26px;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+    text-shadow: 0 0 10px #00d4ff44;
+  }
+  #toggleBtn {
+    width: 100%;
+    padding: 16px;
+    font-size: 19px;
+    font-weight: bold;
+    background: #00c853;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px #00c85344;
+    transition: all 0.3s;
+  }
+  #toggleBtn.off {
+    background: #ff5252;
+    box-shadow: 0 4px 12px #ff525244;
+  }
+  #status {
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    background: #1a1a2e;
+    border: 1px solid #333366;
+  }
+  #numbers {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .numbox {
+    background: #171725;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #2a2a4a;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    box-shadow: 0 2px 10px #00000066;
+    transition: all 0.3s;
+  }
+  .numbox:hover {
+    border-color: #00d4ff66;
+    box-shadow: 0 4px 18px #00d4ff22;
+  }
+  .numbox.copied-flash {
+    background: #4a1a1a !important;
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 20px #ff525266 !important;
+    transition: all 0.4s;
+  }
+  .top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 19px;
+    font-weight: bold;
+  }
+  .phone10 {
+    flex: 1;
+    color: #a5d8ff;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .phone10:hover {
+    background: rgba(0, 212, 255, 0.12);
+  }
+  .copy-number-btn, .copy-otp-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 80px;
+    transition: all 0.2s;
+  }
+  .copy-number-btn {
+    background: #2962ff;
+  }
+  .copy-number-btn.clicked-once {
+    background: #d81b60;
+  }
+  .copy-otp-btn {
+    background: #8e24aa;
+  }
+  .copy-otp-btn:hover { opacity: 0.92; }
+
+  .otp-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0d0d1f;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px dashed #444488;
+  }
+  .otp {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #ffeb3b;
+    min-height: 34px;
+  }
+  .otp.success {
+    color: #00e676;
+    animation: glow 1.5s infinite alternate;
+  }
+  .waiting {
+    color: #ff9800;
+    font-style: italic;
+  }
+
+  .rotating::after {
+    content: "⟳";
+    display: inline-block;
+    margin-left: 8px;
+    animation: spin 1.2s linear infinite;
+    font-size: 18px;
+  }
+
+  @keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 6px #00e67644; }
+    to   { text-shadow: 0 0 18px #00e676aa, 0 0 30px #00e67666; }
+  }
+
+  .timer {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 13px;
+    color: #ff6d00;
+    background: rgba(0,0,0,0.5);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+  }
 </style>
 </head>
 <body>
-<h1>HACKER PANEL 2.0</h1>
-<button id="toggleBtn">START</button>
-<div id="status">Panel Off</div>
+
+<h1>HACKER PANEL 1.0</h1>
+
+<button id="toggleBtn">ON Karo</button>
+<div id="status">Off hai → ON dabao</div>
+
 <div id="numbers"></div>
 
 <script>
-const API1 = "https://nitish.sawanpoint0000.workers.dev";  
-const API2 = "https://saaa.sawanenter7209.workers.dev/";         
-
+const API_KEY  = "1a781664f51ec5c8c82722d31d3c91e4";
+const BASE_URL = "https://api.grizzlysms.com/stubs/handler_api.php";
 const SERVICE  = "swr";
 const COUNTRY  = "22";
 const MAX_PRICE = "80";
 
-const STORAGE       = "numbers_data";
-const COPIED_KEY    = "copied_numbers";
-const PANEL_STATE   = "panel_state";
+const STATE_KEY   = 'hp_isOn';
+const USED_KEY    = 'hp_used_numbers';
+const ACTIVE_KEY  = 'hp_active_numbers';
 
-let numbersData   = JSON.parse(localStorage.getItem(STORAGE) || "[]");
-let copiedNumbers = JSON.parse(localStorage.getItem(COPIED_KEY) || "[]");
-let isOn          = localStorage.getItem(PANEL_STATE) === "true";
+let isOn = localStorage.getItem(STATE_KEY) === 'true';
+let usedNumbers = JSON.parse(localStorage.getItem(USED_KEY)  || '[]');
+let activeNumbers = JSON.parse(localStorage.getItem(ACTIVE_KEY) || '[]');
 
-let interval;
-let requestRunning = false;
-
-const toggleBtn = document.getElementById("toggleBtn");
-const statusDiv = document.getElementById("status");
-const numbersDiv = document.getElementById("numbers");
-
-function saveNumbers() { localStorage.setItem(STORAGE, JSON.stringify(numbersData)); }
-function saveCopied()  { localStorage.setItem(COPIED_KEY, JSON.stringify(copiedNumbers)); }
-function saveState()   { localStorage.setItem(PANEL_STATE, isOn); }
+const toggleBtn  = document.getElementById('toggleBtn');
+const statusDiv  = document.getElementById('status');
+const numbersDiv = document.getElementById('numbers');
 
 function updateUI() {
-    if (isOn) {
-        toggleBtn.textContent = "STOP";
-        toggleBtn.classList.remove("off");
-        statusDiv.textContent = "Panel Running";
-    } else {
-        toggleBtn.textContent = "START";
-        toggleBtn.classList.add("off");
-        statusDiv.textContent = "Panel Off";
-    }
+  toggleBtn.textContent = isOn ? 'OFF Karo' : 'ON Karo';
+  toggleBtn.classList.toggle('off', !isOn);
+  statusDiv.textContent = isOn ? 'Auto buy fast mode...' : 'Off hai → ON dabao';
 }
 
 toggleBtn.onclick = () => {
-    isOn = !isOn;
-    saveState();
-    updateUI();
-    if (isOn) start();
-    else clearInterval(interval);
+  isOn = !isOn;
+  localStorage.setItem(STATE_KEY, isOn);
+  updateUI();
+  if (isOn) start();
+  else clearInterval(interval);
 };
 
-function createBox(data) {
-    const num = data.phone.slice(2);
-    const box = document.createElement("div");
-    box.className = "numbox";
-    if (copiedNumbers.includes(data.id)) box.classList.add("yellow");
-
-    const apiUsed = data.api || "api1";
-
-    box.innerHTML = `
-        <div class="top-row">
-            <div class="phone10">${num}</div>
-            <button class="copy-number-btn">Copy No.</button>
-        </div>
-        <div class="otp-area">
-            <div class="otp ${data.otp ? 'success' : ''}">
-                ${data.otp || "Waiting for OTP..."}
-            </div>
-            <button class="copy-otp-btn">Copy OTP</button>
-        </div>
-        <div class="timer">15:00</div>
-        <div class="api-tag ${apiUsed === 'api1' ? 'api1' : 'api2'}">
-            ${apiUsed.toUpperCase()}
-        </div>
-    `;
-
-    const phoneEl    = box.querySelector(".phone10");
-    const copyNumBtn = box.querySelector(".copy-number-btn");
-    const copyOtpBtn = box.querySelector(".copy-otp-btn");
-    const otpEl      = box.querySelector(".otp");
-    const timerEl    = box.querySelector(".timer");
-
-    function copyNumber() {
-        navigator.clipboard.writeText(num);
-        box.classList.add("yellow");
-        if (!copiedNumbers.includes(data.id)) {
-            copiedNumbers.push(data.id);
-            saveCopied();
-        }
-    }
-
-    phoneEl.onclick = copyNumBtn.onclick = copyNumber;
-
-    copyOtpBtn.onclick = () => {
-        if (data.otp) navigator.clipboard.writeText(data.otp);
-    };
-
-    // 15 मिनट टाइमर (OTP आए या न आए)
-    start15MinTimer(box, data.startTime, data.id, timerEl);
-
-    if (!data.otp) {
-        startOTPPolling(box, data.id, otpEl, data.api);
-    }
-
-    return box;
+function saveActive() {
+  localStorage.setItem(ACTIVE_KEY, JSON.stringify(activeNumbers));
 }
 
-function start15MinTimer(box, startTime, id, timerEl) {
-    const start = startTime || Date.now();
-    const t = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - start) / 1000);
-        let remain = 900 - elapsed; // 15 * 60 = 900
-
-        if (remain <= 0) {
-            clearInterval(t);
-            box.remove();
-            numbersData = numbersData.filter(x => x.id !== id);
-            saveNumbers();
-            return;
-        }
-
-        const m = String(Math.floor(remain / 60)).padStart(2, "0");
-        const s = String(remain % 60).padStart(2, "0");
-        timerEl.textContent = `${m}:${s}`;
-    }, 1000);
-
-    box.longTimer = t;
+function isValid(phone) {
+  if (!phone || phone.length !== 12) return false;
+  if (!phone.startsWith("91")) return false;
+  if (!/^\d{12}$/.test(phone)) return false;
+  if (usedNumbers.includes(phone)) return false;
+  
+  usedNumbers.push(phone);
+  localStorage.setItem(USED_KEY, JSON.stringify(usedNumbers));
+  return true;
 }
 
-async function fetchFromAPI(apiUrl, apiName) {
-    if (!apiUrl) return null;
+function cleanStorage() {
+  const now = Date.now();
+  activeNumbers = activeNumbers.filter(item =>
+    item.phone && item.phone.length === 12 &&
+    item.phone.startsWith("91") &&
+    (now - item.startTime) < 300000
+  );
+  saveActive();
+}
 
+function renderSaved() {
+  cleanStorage();
+  numbersDiv.innerHTML = '';
+  
+  activeNumbers
+    .sort((a,b) => b.startTime - a.startTime)
+    .forEach(item => {
+      const box = createNumberBox(item.phone.slice(2), item.id, item.startTime, item.otp);
+      numbersDiv.appendChild(box);
+      startTimer(box, item.startTime);
+      if (!item.otp) startPolling(box, item.id);
+    });
+}
+
+function flashBoxRed(box) {
+  box.classList.add('copied-flash');
+  setTimeout(() => {
+    box.classList.remove('copied-flash');
+  }, 1500);
+}
+
+function createNumberBox(num10, id, startTime, otp = null) {
+  const box = document.createElement('div');
+  box.className = 'numbox';
+  box.dataset.id = id;
+
+  const clickedClass = localStorage.getItem(`copy_${id}`) === 'once' ? 'clicked-once' : '';
+
+  box.innerHTML = `
+    <div class="top-row">
+      <div class="phone10">${num10}</div>
+      <button class="copy-number-btn ${clickedClass}">Copy No.</button>
+    </div>
+
+    <div class="otp-area ${otp ? '' : 'rotating'}">
+      <div class="otp ${otp ? 'success' : 'waiting'}">
+        ${otp || 'Waiting for OTP...'}
+      </div>
+      <button class="copy-otp-btn">Copy OTP</button>
+    </div>
+
+    <div class="timer">05:00</div>
+  `;
+
+  // Copy on clicking number + red flash
+  const phoneEl = box.querySelector('.phone10');
+  const copyNumBtn = box.querySelector('.copy-number-btn');
+
+  const copyNumberAction = () => {
+    navigator.clipboard.writeText(num10);
+    flashBoxRed(box);
+
+    if (copyNumBtn.classList.contains('clicked-once')) {
+      copyNumBtn.classList.remove('clicked-once');
+      localStorage.removeItem(`copy_${id}`);
+    } else {
+      copyNumBtn.classList.add('clicked-once');
+      localStorage.setItem(`copy_${id}`, 'once');
+    }
+  };
+
+  phoneEl.onclick = copyNumberAction;
+  copyNumBtn.onclick = copyNumberAction;
+
+  // Copy OTP
+  const copyOtpBtn = box.querySelector('.copy-otp-btn');
+  copyOtpBtn.onclick = () => {
+    const otpText = box.querySelector('.otp').textContent.trim();
+    if (otpText !== 'Waiting for OTP...' && otpText !== 'OTP wait...') {
+      navigator.clipboard.writeText(otpText);
+      copyOtpBtn.textContent = "Copied!";
+      setTimeout(() => { copyOtpBtn.textContent = "Copy OTP"; }, 1800);
+    }
+  };
+
+  return box;
+}
+
+function startTimer(box, startTime) {
+  let remaining = 300 - Math.floor((Date.now() - startTime) / 1000);
+  const timer = box.querySelector('.timer');
+  
+  const int = setInterval(() => {
+    remaining--;
+    const m = String(Math.floor(remaining/60)).padStart(2,'0');
+    const s = String(remaining%60).padStart(2,'0');
+    timer.textContent = `${m}:${s}`;
+    
+    if (remaining <= 0) {
+      clearInterval(int);
+      box.remove();
+      activeNumbers = activeNumbers.filter(i => i.id !== box.dataset.id);
+      saveActive();
+    }
+  }, 980);
+}
+
+function startPolling(box, id) {
+  const otpEl = box.querySelector('.otp');
+  const otpArea = box.querySelector('.otp-area');
+
+  const poll = setInterval(async () => {
+    const q = new URLSearchParams({ api_key: API_KEY, action: 'getStatus', id });
     try {
-        const params = new URLSearchParams({
-            action: "getNumber",
-            service: SERVICE,
-            country: COUNTRY,
-            maxPrice: MAX_PRICE
-        });
-
-        const res = await fetch(apiUrl + "?" + params);
-        const text = (await res.text()).trim();
-
-        if (text.startsWith("ACCESS_NUMBER")) {
-            const [, id, phone] = text.split(":");
-            if (numbersData.some(x => x.id === id)) return null;
-
-            return {
-                id,
-                phone,
-                otp: null,
-                startTime: Date.now(),
-                api: apiName
-            };
+      const r = await fetch(BASE_URL + '?' + q);
+      const t = (await r.text()).trim();
+      
+      if (t.startsWith('STATUS_OK')) {
+        const code = t.split(':')[1];
+        otpEl.textContent = code;
+        otpEl.classList.add('success');
+        otpArea.classList.remove('rotating');
+        clearInterval(poll);
+        
+        const item = activeNumbers.find(i => i.id === id);
+        if (item) {
+          item.otp = code;
+          saveActive();
         }
-    } catch (e) {}
-    return null;
+      }
+    } catch {}
+  }, 1800);
 }
+
+let interval;
 
 async function fetchNumber() {
-    if (!isOn || requestRunning) return;
-    requestRunning = true;
+  if (!isOn) return;
+  
+  const p = new URLSearchParams({
+    api_key: API_KEY,
+    action: 'getNumber',
+    service: SERVICE,
+    country: COUNTRY,
+    maxPrice: MAX_PRICE
+  });
 
-    let item = null;
+  try {
+    const res = await fetch(BASE_URL + '?' + p);
+    const txt = (await res.text()).trim();
+    
+    if (txt.startsWith('ACCESS_NUMBER')) {
+      const [_, id, full] = txt.split(':');
+      if (!isValid(full)) return;
 
-    // पहले API1 ट्राई
-    item = await fetchFromAPI(API1, "api1");
+      const startTime = Date.now();
+      const item = { id, phone: full, startTime, otp: null };
+      activeNumbers.unshift(item);
+      saveActive();
 
-    // अगर API1 से नहीं मिला तो API2
-    if (!item && API2) {
-        item = await fetchFromAPI(API2, "api2");
+      const box = createNumberBox(full.slice(2), id, startTime);
+      numbersDiv.prepend(box);
+
+      startTimer(box, startTime);
+      startPolling(box, id);
     }
-
-    if (item) {
-        numbersData.unshift(item);
-        saveNumbers();
-        numbersDiv.prepend(createBox(item));
-    }
-
-    requestRunning = false;
-}
-
-function startOTPPolling(box, id, otpEl, apiUsed) {
-    const apiUrl = apiUsed === "api2" ? API2 : API1;
-
-    const poll = setInterval(async () => {
-        try {
-            const q = new URLSearchParams({ action: "getStatus", id });
-            const r = await fetch(apiUrl + "?" + q);
-            const t = (await r.text()).trim();
-
-            if (t.startsWith("STATUS_OK")) {
-                const code = t.split(":")[1];
-                otpEl.textContent = code;
-                otpEl.classList.add("success");
-                navigator.clipboard.writeText(code);
-
-                const item = numbersData.find(x => x.id === id);
-                if (item) {
-                    item.otp = code;
-                    saveNumbers();
-                }
-
-                clearInterval(poll);
-            }
-        } catch (e) {}
-    }, 2000);
-
-    box.pollInterval = poll;
-}
-
-function renderAll() {
-    numbersDiv.innerHTML = "";
-    numbersData.forEach(n => numbersDiv.appendChild(createBox(n)));
+  } catch {}
 }
 
 function start() {
-    fetchNumber();
-    interval = setInterval(fetchNumber, 400); // हर ~0.4 सेकंड में ट्राई
+  fetchNumber();
+  interval = setInterval(fetchNumber, 1200);
 }
 
 updateUI();
-renderAll();
+renderSaved();
 if (isOn) start();
 </script>
 </body>
